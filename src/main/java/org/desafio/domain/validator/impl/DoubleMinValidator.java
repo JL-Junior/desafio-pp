@@ -1,5 +1,6 @@
 package org.desafio.domain.validator.impl;
 
+import io.quarkus.logging.Log;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.desafio.domain.enumeration.ErrorEnum;
@@ -23,6 +24,7 @@ public class DoubleMinValidator implements ConstraintValidator<CustomMin, Double
 
     @Override
     public boolean isValid(Double amount, ConstraintValidatorContext constraintValidatorContext) {
+        Log.info("Validating minimum double field...");
         constraintValidatorContext
                 .buildConstraintViolationWithTemplate(errorMessage.getCode())
                 .addConstraintViolation();

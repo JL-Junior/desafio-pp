@@ -1,5 +1,6 @@
 package org.desafio.domain.validator.impl;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.util.StringUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -22,6 +23,7 @@ public class NullOrBlankValidator implements ConstraintValidator<CustomRequiredF
 
         @Override
         public boolean isValid(Object obj, ConstraintValidatorContext constraintValidatorContext) {
+            Log.info("Validating if field is null or empty...");
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate(errorMessage.getCode())
                     .addConstraintViolation();

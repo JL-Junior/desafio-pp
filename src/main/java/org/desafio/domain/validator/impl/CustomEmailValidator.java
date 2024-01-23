@@ -1,5 +1,6 @@
 package org.desafio.domain.validator.impl;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.util.StringUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -19,11 +20,13 @@ public class CustomEmailValidator implements ConstraintValidator<CustomEmailPatt
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+        Log.info("Validating email pattern...");
         constraintValidatorContext
                 .buildConstraintViolationWithTemplate(errorEnum.getCode())
                 .addConstraintViolation();
 
         constraintValidatorContext.disableDefaultConstraintViolation();
+
         if(StringUtil.isNullOrEmpty(s)) return true;
         return s.matches("^[a-z0-9\\_.]+@[a-z0-9]+\\.[a-z]+(\\.[a-z]+)?$");
     }

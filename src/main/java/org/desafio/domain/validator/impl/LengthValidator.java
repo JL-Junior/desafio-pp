@@ -1,5 +1,6 @@
 package org.desafio.domain.validator.impl;
 
+import io.quarkus.logging.Log;
 import io.quarkus.runtime.util.StringUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -25,6 +26,7 @@ public class LengthValidator implements ConstraintValidator<CustomLength, String
 
     @Override
     public boolean isValid(String text, ConstraintValidatorContext constraintValidatorContext) {
+        Log.info("Validating string length...");
         constraintValidatorContext
                 .buildConstraintViolationWithTemplate(errorMessage.getCode())
                 .addConstraintViolation();
