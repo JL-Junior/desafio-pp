@@ -17,9 +17,14 @@ public enum ErrorEnum {
     TOO_MUCH_SENDER_ID_FIELDS("008", "Too much sender id fields"),
     INVALID_SENDER_EMAIL_FORMAT("009", "Invalid sender email format"),
     INVALID_RECEIVER_EMAIL_FORMAT("010", "Invalid receiver email format"),
-    SAME_RECEIVER_AND_SENDER_DATA("011","Same receiver and sender identifier value" );
+    SAME_RECEIVER_AND_SENDER_DATA("011","Same receiver and sender identifier value" ),
+    SENDER_NOT_FOUND("012", "Sender not found"),
+    RECEIVER_NOT_FOUND("013", "Receiver not found"),
+    SENDER_TYPE_CANT_PAY("014", "Sender type can't do payments"),
+    RECEIVER_TYPE_CANT_RECEIVE("015", "Receiver type can't receive payments"),
+    INSUFFICIENT_FUNDS("016", "Insufficient funds");
 
-    private String code;
-    private String message;
+    private final String code;
+    private final String message;
 
 }

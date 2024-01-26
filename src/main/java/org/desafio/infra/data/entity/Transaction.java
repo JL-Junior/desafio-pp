@@ -30,10 +30,10 @@ public class Transaction {
     Double amount;
 
     @Column(name = "id_sender")
-    Long SenderId;
+    Long senderId;
 
     @Column(name = "id_receiver")
-    Long ReceiverId;
+    Long receiverId;
 
     @Column(name = "dt_timestamp")
     LocalDateTime timestamp;

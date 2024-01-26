@@ -1,51 +1,80 @@
 package org.desafio.domain.service;
 
+import io.quarkus.logging.Log;
+import io.quarkus.runtime.util.StringUtil;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.desafio.domain.dto.CreateTransactionRequest;
 import org.desafio.domain.enumeration.ErrorEnum;
 import org.desafio.domain.exception.ApplicationException;
+import org.desafio.domain.exception.NotFoundApplicationException;
 import org.desafio.domain.usecase.CreateTransactionUseCase;
+import org.desafio.infra.data.entity.User;
+import org.desafio.infra.data.entity.UserDocument;
+import org.desafio.infra.data.repository.UserDocumentRepository;
+import org.desafio.infra.data.repository.UserRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
 
 @ApplicationScoped
 public class TransactionService implements CreateTransactionUseCase {
 
+    @Inject
+    UserDocumentRepository userDocumentRepository;
+
+    @Inject
+    UserRepository userRepository;
+
     @Override
     @Transactional
     public UUID createTransaction(CreateTransactionRequest request) {
+        log("initializing create transaction process...");
         validateFields(request);
-        validateExistences(request);
-        validateCanPay(request);
-        validateCanReceive(request);
-        validateBalance(request);
+        User sender = validateSenderExistence(request);
+        User receiver = validateReceiverExistence(request);
+        validateSamePerson(sender, receiver);
+        validateCanPay(sender);
+        validateCanReceive(receiver);
+        validateBalance(sender, request.amount());
 
-
-        UUID id = doTransaction(request);
+        UUID id = doTransaction(sender, receiver, request.amount());
 
         notifyReceiver(request);
 
         return id;
     }
 
-    private void validateCanReceive(CreateTransactionRequest request) {
-        //TODO validate user can receive
-
+    private void validateSamePerson(User sender, User receiver) {
+        if(sender.getId().equals(receiver.getId()))
+            throw ApplicationException.of(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
     }
 
-    private void validateCanPay(CreateTransactionRequest request) {
-        //TODO validate user can pay
+
+    private void validateCanReceive(User user) {
+        if(! user.getUserType().getReceive())
+            throw ApplicationException.of(ErrorEnum.RECEIVER_TYPE_CANT_RECEIVE);
+    }
+
+    private void validateCanPay(User user) {
+        if(! user.getUserType().getSend())
+            throw ApplicationException.of(ErrorEnum.SENDER_TYPE_CANT_PAY);
     }
 
     private void notifyReceiver(CreateTransactionRequest request) {
         // TODO call notify service
     }
 
-    private UUID doTransaction(CreateTransactionRequest request) {
-        updateSenderBalance(request);
-        updateReceiverBalance(request);
-        UUID id = saveTransaction(request);
+    private UUID doTransaction(User sender, User receiver, Double amount) {
+        updateSenderBalance(sender, amount);
+        updateReceiverBalance(receiver, amount);
+//        UUID id = saveTransaction(sender, receiver, amount);
+        UUID id = UUID.randomUUID();
         callAuthorizeService();
         return id;
     }
@@ -54,71 +83,85 @@ public class TransactionService implements CreateTransactionUseCase {
         // TODO call authorize mock service
     }
 
-    private void updateReceiverBalance(CreateTransactionRequest request) {
-        // TODO implementar atualizar o saldo da pessoa que recebeu
-
+    private void updateReceiverBalance(User receiver, Double amount) {
+        userRepository.updateBalanceById(receiver.getId(), receiver.getBalance() + amount);
     }
 
-    private void updateSenderBalance(CreateTransactionRequest request) {
-        // TODO implementar atualizar o saldo da pessoa que enviou
+    private void updateSenderBalance(User sender, Double amount) {
+        userRepository.updateBalanceById(sender.getId(), sender.getBalance() - amount);
     }
 
-    private void validateBalance(CreateTransactionRequest request) {
-        // TODO valida se a pessoa tem saldo na conta
+    private void validateBalance(User user, Double amount) {
+        if(user.getBalance() < amount)
+            throw ApplicationException.of(ErrorEnum.INSUFFICIENT_FUNDS);
     }
 
-    private void validateExistences(CreateTransactionRequest request) {
-        validateSenderExistence(request);
-        validateReceiverExistence(request);
+
+    private User validateReceiverExistence(CreateTransactionRequest request) {
+        Optional<User> user = getUser(
+                request.id_receiver(),
+                request.document_receiver(),
+                request.email_receiver());
+
+        return user.orElseThrow(() -> NotFoundApplicationException.of(ErrorEnum.RECEIVER_NOT_FOUND));
     }
 
-    private void validateReceiverExistence(CreateTransactionRequest request) {
-        // TODO implementar se a pessoa que recebe existe
+    private User validateSenderExistence(CreateTransactionRequest request) {
+        Optional<User> user = getUser(
+                request.id_sender(),
+                request.document_sender(),
+                request.email_sender());
+
+        return user.orElseThrow(() -> NotFoundApplicationException.of(ErrorEnum.SENDER_NOT_FOUND));
     }
 
-    private void validateSenderExistence(CreateTransactionRequest request) {
-        // TODO implementar se pessoa que envia existe
+    private Optional<User> getUser(Long id, Long document, String email) {
+        if(Objects.nonNull(id))
+            return userRepository.getById(id);
+
+        if(!StringUtil.isNullOrEmpty(email)){
+            return  userRepository.getByEmail(email);
+        }
+
+        return userDocumentRepository
+                .getByNumber(document)
+                .map(UserDocument::getUser);
     }
 
-    private UUID saveTransaction(CreateTransactionRequest request) {
+    private UUID saveTransaction(User request, User receiver, Double amount) {
         // TODO salvar dados da transacao no banco de dados
         return null;
 
     }
 
     private void validateFields(CreateTransactionRequest request) {
+        Log.info("Validating fields...");
         validateReceiverData(request);
         validateSenderData(request);
         validateSameData(request);
-        // TODO validar campos de pessoa que recebe
     }
 
     private void validateSameData(CreateTransactionRequest request) {
+        log("Validating if has same input...");
         Object[][] validationData = new Object[][]{
                 {request.id_receiver(), request.id_sender()},
                 {request.email_receiver(), request.email_sender()},
                 {request.document_receiver(), request.document_sender()}
         };
-        for(int row = 0; row < validationData.length; row++){
-            Object receiverData = validationData[row][0];
-            Object senderData = validationData[row][1];
-            if(Objects.isNull(receiverData) || Objects.isNull(senderData))
+        for (Object[] validationDatum : validationData) {
+            Object receiverData = validationDatum[0];
+            Object senderData = validationDatum[1];
+            if (Objects.isNull(receiverData) || Objects.isNull(senderData))
                 continue;
 
-            if(receiverData.equals(senderData))
+            if (receiverData.equals(senderData))
                 throw ApplicationException.of(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
         }
-
-        /*
-        continue = vai pro proximo item  do loop
-        break = corta o for e sai do looping
-        return = corta a execução do método
-
-         */
     }
 
 
     private void validateSenderData(CreateTransactionRequest request) {
+        log("Validating sender data...");
         final List<Object> senderData =  new ArrayList<>();
         senderData.add(request.document_sender());
         senderData.add(request.email_sender());
@@ -128,6 +171,8 @@ public class TransactionService implements CreateTransactionUseCase {
                 .stream()
                 .allMatch(Objects::isNull);
 
+        log("Validating if has no sender identifier fields...");
+
         if(isAllNull)
             throw ApplicationException.of(ErrorEnum.NO_SENDER_DATA);
 
@@ -136,11 +181,13 @@ public class TransactionService implements CreateTransactionUseCase {
                 .filter(Objects::nonNull)
                 .count() > 1;
 
+        log("Validating if has too much sender identifier fields...");
         if(hasTooMuchData)
             throw ApplicationException.of(ErrorEnum.TOO_MUCH_SENDER_ID_FIELDS);
     }
 
     private void validateReceiverData(CreateTransactionRequest request){
+        log("Validating receiver data");
         final List<Object> receiverData =  new ArrayList<>();
         receiverData.add(request.document_receiver());
         receiverData.add(request.email_receiver());
@@ -150,6 +197,8 @@ public class TransactionService implements CreateTransactionUseCase {
                 .stream()
                 .allMatch(Objects::isNull);
 
+        log("Validating if has no receiver identifier fields...");
+
         if(isAllNull)
             throw ApplicationException.of(ErrorEnum.NO_RECEIVER_DATA);
 
@@ -158,7 +207,12 @@ public class TransactionService implements CreateTransactionUseCase {
                 .filter(Objects::nonNull)
                 .count() > 1;
 
+        log("Validating if has too much receiver identifier fields...");
         if(hasTooMuchData)
             throw ApplicationException.of(ErrorEnum.TOO_MUCH_RECEIVER_ID_FIELDS);
+    }
+
+    private static void log(String message) {
+        Log.info(message);
     }
 }
