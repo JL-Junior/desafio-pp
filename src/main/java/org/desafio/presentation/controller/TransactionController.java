@@ -1,4 +1,4 @@
-package org.desafio.rest.controller;
+package org.desafio.presentation.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -6,7 +6,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.desafio.domain.dto.CreateTransactionRequest;
 import org.desafio.domain.usecase.CreateTransactionUseCase;
-import org.desafio.rest.api.TransactionAPI;
+import org.desafio.presentation.api.TransactionAPI;
 
 import java.net.URI;
 import java.util.UUID;
@@ -14,11 +14,15 @@ import java.util.UUID;
 @ApplicationScoped
 public class TransactionController implements TransactionAPI {
 
-    @Inject
-    CreateTransactionUseCase createTransactionUseCase;
+    final CreateTransactionUseCase createTransactionUseCase;
+
+    final UriInfo uri;
 
     @Inject
-    UriInfo uri;
+    public TransactionController(CreateTransactionUseCase createTransactionUseCase, UriInfo uri) {
+        this.createTransactionUseCase = createTransactionUseCase;
+        this.uri = uri;
+    }
 
     @Override
     public Response createTransaction(CreateTransactionRequest request) {

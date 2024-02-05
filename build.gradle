@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.quarkus'
+    id "org.sonarqube" version "4.4.1.3373"
 }
 
 repositories {
@@ -9,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    implementation("io.quarkus:quarkus-config-yaml")
+    implementation 'io.quarkus:quarkus-rest-client-reactive-jackson'
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-hibernate-orm-rest-data-panache'
     implementation 'io.quarkus:quarkus-resteasy-reactive-jackson'

@@ -1,6 +1,14 @@
 -- user type
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE USER sonar WITH PASSWORD 'sonar123';
+
+CREATE USER metabase WITH PASSWORD 'metabase';
+
+CREATE DATABASE sonar WITH OWNER sonar;
+
+CREATE DATABASE metabase WITH OWNER metabase;
+
 CREATE TABLE tb_user_type(
 id_user_type bigint GENERATED ALWAYS as IDENTITY,
 tx_description varchar(255),

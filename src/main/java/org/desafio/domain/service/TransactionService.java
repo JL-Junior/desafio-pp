@@ -12,6 +12,7 @@ import org.desafio.domain.exception.NotFoundApplicationException;
 import org.desafio.domain.usecase.CreateTransactionUseCase;
 import org.desafio.infra.data.entity.User;
 import org.desafio.infra.data.entity.UserDocument;
+import org.desafio.infra.data.repository.TransactionRepository;
 import org.desafio.infra.data.repository.UserDocumentRepository;
 import org.desafio.infra.data.repository.UserRepository;
 
@@ -25,11 +26,18 @@ import java.util.UUID;
 @ApplicationScoped
 public class TransactionService implements CreateTransactionUseCase {
 
-    @Inject
-    UserDocumentRepository userDocumentRepository;
+    final UserDocumentRepository userDocumentRepository;
+
+    final UserRepository userRepository;
+
+    final TransactionRepository transactionRepository;
 
     @Inject
-    UserRepository userRepository;
+    public TransactionService(UserDocumentRepository userDocumentRepository, UserRepository userRepository, TransactionRepository transactionRepository) {
+        this.userDocumentRepository = userDocumentRepository;
+        this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
+    }
 
     @Override
     @Transactional
@@ -73,8 +81,7 @@ public class TransactionService implements CreateTransactionUseCase {
     private UUID doTransaction(User sender, User receiver, Double amount) {
         updateSenderBalance(sender, amount);
         updateReceiverBalance(receiver, amount);
-//        UUID id = saveTransaction(sender, receiver, amount);
-        UUID id = UUID.randomUUID();
+        UUID id = saveTransaction(sender, receiver, amount);
         callAuthorizeService();
         return id;
     }
@@ -84,10 +91,12 @@ public class TransactionService implements CreateTransactionUseCase {
     }
 
     private void updateReceiverBalance(User receiver, Double amount) {
+        log("Updating receiver's balance...");
         userRepository.updateBalanceById(receiver.getId(), receiver.getBalance() + amount);
     }
 
     private void updateSenderBalance(User sender, Double amount) {
+        log("Updating sender's balance...");
         userRepository.updateBalanceById(sender.getId(), sender.getBalance() - amount);
     }
 
@@ -128,10 +137,9 @@ public class TransactionService implements CreateTransactionUseCase {
                 .map(UserDocument::getUser);
     }
 
-    private UUID saveTransaction(User request, User receiver, Double amount) {
-        // TODO salvar dados da transacao no banco de dados
-        return null;
-
+    private UUID saveTransaction(User sender, User receiver, Double amount) {
+        log("Saving transaction...");
+        return transactionRepository.saveTransaction(sender.getId(), receiver.getId(), amount);
     }
 
     private void validateFields(CreateTransactionRequest request) {

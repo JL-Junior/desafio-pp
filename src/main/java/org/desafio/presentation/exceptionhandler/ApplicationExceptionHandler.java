@@ -1,12 +1,10 @@
-package org.desafio.rest.exceptionhandler;
+package org.desafio.presentation.exceptionhandler;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import org.desafio.domain.dto.ErrorResponse;
 import org.desafio.domain.exception.ApplicationException;
-
-import java.sql.Date;
 
 @Provider
 public class ApplicationExceptionHandler implements ExceptionMapper<ApplicationException> {

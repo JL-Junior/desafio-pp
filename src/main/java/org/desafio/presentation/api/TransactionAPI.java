@@ -1,4 +1,4 @@
-package org.desafio.rest.api;
+package org.desafio.presentation.api;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -6,11 +6,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.desafio.rest.example.AmountMissingResponse;
+import org.desafio.presentation.example.AmountMissingResponse;
 import org.desafio.domain.dto.CreateTransactionRequest;
 
-import org.desafio.rest.example.AmountLessZeroResponse;
-import org.desafio.rest.example.SenderNotFoundResponse;
+import org.desafio.presentation.example.AmountLessZeroResponse;
+import org.desafio.presentation.example.SenderNotFoundResponse;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;

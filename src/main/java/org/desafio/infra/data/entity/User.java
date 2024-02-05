@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,7 @@ public class User {
     String completeName;
 
     @Column(name = "id_user_type")
-    Short userTypeId;
+    Long userTypeId;
 
     @Column( name = "tx_email", unique = true, length = 256)
     String email;

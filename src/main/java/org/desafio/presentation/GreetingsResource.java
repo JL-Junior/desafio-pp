@@ -1,4 +1,4 @@
-package org.desafio.rest;
+package org.desafio.presentation;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;

@@ -1,4 +1,4 @@
-package org.desafio.rest.exceptionhandler;
+package org.desafio.presentation.exceptionhandler;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;

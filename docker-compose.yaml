@@ -3,7 +3,7 @@ version: '3.1'
 
 services:
 
-  db-app:
+  db:
     image: postgres
     container_name: postgres-app
     environment:
@@ -14,33 +14,7 @@ services:
       - ${DB_PORT}:5432
     volumes:
       - postgresql:/var/lib/postgresql
-      - postgresql_data:/var/lib/postgresql/data
       - ./dataset:/docker-entrypoint-initdb.d
-
-  db-sonar:
-    image: postgres:alpine
-    container_name: postgres-sonar
-    environment:
-      POSTGRES_PASSWORD: sonar1234
-      POSTGRES_USER: sonaruser
-      POSTGRES_DB: sonar
-    ports:
-      - "5434:5432"
-    volumes:
-      - sonar_database:/var/lib/postgresql
-
-  db-metabase:
-    image: postgres:alpine
-    container_name: postgres-metabase
-    environment:
-      POSTGRES_PASSWORD: metabase
-      POSTGRES_USER: metabase
-      POSTGRES_DB: metabase
-    ports:
-      - "5435:5432"
-    volumes:
-      - metabase_database:/var/lib/postgresql
-
 
   app:
     image: quarkus/desafio.pp-jvm
@@ -48,12 +22,12 @@ services:
     environment:
       - DB_PASSWORD
       - DB_USER_NAME
-      - DB_PORT
+      - DB_PORT=5432
       - DB_NAME
-      - DB_URL
+      - DB_URL=db
       - GENERATION=none
     depends_on:
-      - db-app
+      - db
     ports:
       - "8080:8080"
 
@@ -62,15 +36,13 @@ services:
     hostname: sonarqube
     container_name: sonarqube
     depends_on:
-      - db-sonar
+      - db
     environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db-sonar:5432/sonar
-      SONAR_JDBC_USERNAME: sonaruser
-      SONAR_JDBC_PASSWORD: sonar1234
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar123
     volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube:/opt/sonarqube
     ports:
       - "9000:9000"
 
@@ -79,9 +51,9 @@ services:
     environment:
       MB_DB_USER: metabase
       MB_DB_PASS: metabase
-      MB_DB_CONNECTION_URI: jdbc:postgresql://db-metabase:5432/metabase
+      MB_DB_CONNECTION_URI: jdbc:postgresql://db:5432/metabase
     depends_on:
-      - db-metabase
+      - db
     ports:
       - "3000:3000"
     volumes:
@@ -89,11 +61,6 @@ services:
 
 
 volumes:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
+  sonarqube:
   postgresql:
-  postgresql_data:
   metabase-data:
-  sonar_database:
-  metabase_database:

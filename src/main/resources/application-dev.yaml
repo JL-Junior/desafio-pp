@@ -1,0 +1,13 @@
+quarkus:
+  hibernate-orm:
+    database:
+      generation:
+        ~: none
+
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USER_NAME}
+    password: ${DB_PASSWORD}
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/${DB_NAME}
+      max-size: 16

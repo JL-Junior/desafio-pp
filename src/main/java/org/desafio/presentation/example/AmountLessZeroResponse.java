@@ -1,4 +1,4 @@
-package org.desafio.rest.example;
+package org.desafio.presentation.example;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;

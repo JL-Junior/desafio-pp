@@ -1,0 +1,1 @@
+./gradlew sonar -Dsonar.projectKey=Desafio-PicPay -Dsonar.projectName="Desafio PicPay" -Dsonar.host.url=http://localhost:9000 -Dsonar.token=sqp_d15e0acdc3cfbd21333e8d1bcadfe7be810b562f

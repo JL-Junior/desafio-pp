@@ -1,4 +1,4 @@
-package org.desafio.rest.exceptionhandler;
+package org.desafio.presentation.exceptionhandler;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -10,8 +10,6 @@ import org.desafio.domain.enumeration.ErrorEnum;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Provider
 public class ConstraintViolationExceptionHandler implements ExceptionMapper<ConstraintViolationException> {
