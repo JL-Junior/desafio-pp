@@ -1,9 +1,10 @@
 package org.desafio.domain.enumeration;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public enum ErrorEnum {
     DEFAULT_VALIDATION_ERROR("000", "Default Validation Error"),
@@ -22,9 +23,9 @@ public enum ErrorEnum {
     RECEIVER_NOT_FOUND("013", "Receiver not found"),
     SENDER_TYPE_CANT_PAY("014", "Sender type can't do payments"),
     RECEIVER_TYPE_CANT_RECEIVE("015", "Receiver type can't receive payments"),
-    INSUFFICIENT_FUNDS("016", "Insufficient funds");
+    INSUFFICIENT_FUNDS("016", "Insufficient funds"),
+    ERROR_ON_EXTERNAL_SERVICE_CALL("017", "Error on call external service!");
 
     private final String code;
     private final String message;
-
 }

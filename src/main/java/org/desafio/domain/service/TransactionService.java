@@ -5,6 +5,7 @@ import io.quarkus.runtime.util.StringUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.SneakyThrows;
 import org.desafio.domain.dto.CreateTransactionRequest;
 import org.desafio.domain.enumeration.ErrorEnum;
 import org.desafio.domain.exception.ApplicationException;
@@ -15,6 +16,7 @@ import org.desafio.infra.data.entity.UserDocument;
 import org.desafio.infra.data.repository.TransactionRepository;
 import org.desafio.infra.data.repository.UserDocumentRepository;
 import org.desafio.infra.data.repository.UserRepository;
+import org.desafio.infra.rest.client.ApplicationRestClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +34,18 @@ public class TransactionService implements CreateTransactionUseCase {
 
     final TransactionRepository transactionRepository;
 
+    final ApplicationRestClient restClient;
+
     @Inject
-    public TransactionService(UserDocumentRepository userDocumentRepository, UserRepository userRepository, TransactionRepository transactionRepository) {
+    public TransactionService(
+            UserDocumentRepository userDocumentRepository,
+            UserRepository userRepository,
+            TransactionRepository transactionRepository,
+            ApplicationRestClient restClient) {
         this.userDocumentRepository = userDocumentRepository;
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
+        this.restClient = restClient;
     }
 
     @Override
@@ -82,12 +91,14 @@ public class TransactionService implements CreateTransactionUseCase {
         updateSenderBalance(sender, amount);
         updateReceiverBalance(receiver, amount);
         UUID id = saveTransaction(sender, receiver, amount);
-        callAuthorizeService();
+        callAuthorizeService(id);
         return id;
     }
 
-    private void callAuthorizeService() {
-        // TODO call authorize mock service
+    @SneakyThrows
+    private void callAuthorizeService(UUID id) {
+        log("Calling authorization service...");
+        restClient.authorizeTransaction(id);
     }
 
     private void updateReceiverBalance(User receiver, Double amount) {

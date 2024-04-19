@@ -20,12 +20,12 @@ services:
     image: quarkus/desafio.pp-jvm
     container_name: application
     environment:
-      - DB_PASSWORD
-      - DB_USER_NAME
-      - DB_PORT=5432
-      - DB_NAME
-      - DB_URL=db
-      - GENERATION=none
+      DB_PASSWORD: prod@1234
+      DB_USER_NAME: application
+      DB_PORT: 5432
+      DB_NAME: transactions
+      DB_URL: db
+      GENERATION: none
     depends_on:
       - db
     ports:

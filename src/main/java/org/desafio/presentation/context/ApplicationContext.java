@@ -9,4 +9,5 @@ import lombok.Setter;
 @Setter
 public class ApplicationContext {
     boolean isUnauthorized = false;
+    boolean isFailingNotification = false;
 }

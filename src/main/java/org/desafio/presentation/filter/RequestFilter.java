@@ -1,5 +1,6 @@
 package org.desafio.presentation.filter;
 
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -17,6 +18,7 @@ public class RequestFilter {
 
     @ServerRequestFilter(preMatching = true)
     public void getUnauthorizedHeader(ContainerRequestContext requestContext) {
+        Log.info("Getting unauthorized header...");
         String header = requestContext.getHeaderString(Header.TRANSACTION_UNAUTHORIZED);
 
         if(Objects.isNull(header))
@@ -24,5 +26,17 @@ public class RequestFilter {
 
         boolean isUnauthorized = Boolean.parseBoolean(header);
         context.setUnauthorized(isUnauthorized);
+    }
+
+    @ServerRequestFilter(preMatching = true)
+    public void getFailingNotification(ContainerRequestContext requestContext) {
+        Log.info("Getting failing notification header...");
+        String header = requestContext.getHeaderString(Header.NOT_SEND_NOTIFICATION);
+
+        if(Objects.isNull(header))
+            return;
+
+        boolean isFailNotification = Boolean.parseBoolean(header);
+        context.setFailingNotification(isFailNotification);
     }
 }
