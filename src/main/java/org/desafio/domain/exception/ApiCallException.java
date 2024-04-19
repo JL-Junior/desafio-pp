@@ -6,9 +6,4 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class ApiCallException extends Exception {
-    int statusCode;
-    String payload;
-    String baseUrl;
-    String endpoint;
-}
+public class ApiCallException extends Exception {}

@@ -24,7 +24,8 @@ public enum ErrorEnum {
     SENDER_TYPE_CANT_PAY("014", "Sender type can't do payments"),
     RECEIVER_TYPE_CANT_RECEIVE("015", "Receiver type can't receive payments"),
     INSUFFICIENT_FUNDS("016", "Insufficient funds"),
-    ERROR_ON_EXTERNAL_SERVICE_CALL("017", "Error on call external service!");
+    ERROR_ON_AUTHORIZATION_SERVICE_CALL("017", "Error on call authorization external service!"),
+    ERROR_ON_NOTIFICATION_SERVICE_CALL("018", "Error on call notification external service!");
 
     private final String code;
     private final String message;

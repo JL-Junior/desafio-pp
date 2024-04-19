@@ -1,15 +1,12 @@
 package org.desafio.infra.rest.client;
 
-import jakarta.json.JsonObject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import org.desafio.infra.rest.dto.AuthorizationRequest;
+import org.desafio.infra.rest.dto.AuthorizationResponse;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-
-import javax.accessibility.AccessibleStateSet;
+import org.jboss.resteasy.reactive.RestResponse;
 
 
 @RegisterRestClient(configKey = "authorization-api")
@@ -17,7 +14,6 @@ import javax.accessibility.AccessibleStateSet;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface AuthorizationRestClient {
 
-    @POST
-    @Path("/authorization")
-    JsonObject authorizeTransaction(AuthorizationRequest request);
+    @GET
+    RestResponse<AuthorizationResponse> authorizeTransaction();
 }

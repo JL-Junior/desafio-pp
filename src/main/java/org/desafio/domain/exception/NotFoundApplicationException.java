@@ -6,7 +6,7 @@ import org.desafio.domain.enumeration.ErrorEnum;
 
 public class NotFoundApplicationException extends ApplicationException {
 
-    private NotFoundApplicationException(ErrorEnum errorEnum){
+    public NotFoundApplicationException(ErrorEnum errorEnum) {
         super(errorEnum);
     }
 
