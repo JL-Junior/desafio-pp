@@ -2,14 +2,14 @@ quarkus:
   hibernate-orm:
     database:
       generation:
-        ~: none
+        ~: drop-and-create
 
   datasource:
     db-kind: postgresql
-    username: ${DB_USER_NAME}
-    password: ${DB_PASSWORD}
+    username: dev_user
+    password: devuser123
     jdbc:
-      url: jdbc:postgresql://localhost:${DB_PORT}/${DB_NAME}
+      url: jdbc:postgresql://localhost:${DB_PORT}/dev
       max-size: 16
 
   rest-client:

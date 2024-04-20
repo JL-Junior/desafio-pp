@@ -5,7 +5,11 @@ CREATE USER sonar WITH PASSWORD 'sonar123';
 
 CREATE USER metabase WITH PASSWORD 'metabase';
 
+CREATE USER dev_user WITH PASSWORD 'devuser123';
+
 CREATE DATABASE sonar WITH OWNER sonar;
+
+CREATE DATABASE dev WITH OWNER dev_user;
 
 CREATE DATABASE metabase WITH OWNER metabase;
 

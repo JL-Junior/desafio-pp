@@ -1,5 +1,6 @@
 package org.desafio.presentation.controller;
 
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -26,8 +27,10 @@ public class TransactionController implements TransactionAPI {
 
     @Override
     public Response createTransaction(CreateTransactionRequest request) {
+        Log.info("Receiving request...");
         UUID id = createTransactionUseCase.createTransaction(request);
 
+        Log.info("Sending Response...");
         return Response.created(URI.create(uri.getPath() + "/" + id.toString())).build();
     }
 

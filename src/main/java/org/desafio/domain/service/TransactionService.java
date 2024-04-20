@@ -17,12 +17,15 @@ import org.desafio.infra.data.repository.TransactionRepository;
 import org.desafio.infra.data.repository.UserDocumentRepository;
 import org.desafio.infra.data.repository.UserRepository;
 import org.desafio.infra.rest.client.ApplicationRestClient;
+import org.desafio.infra.rest.dto.NotifyUserResponse;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 
 @ApplicationScoped
@@ -62,10 +65,12 @@ public class TransactionService implements CreateTransactionUseCase {
 
         UUID id = doTransaction(sender, receiver, request.amount());
 
-        notifyReceiver(request);
-
+        notifyUsers(sender.getId(), receiver.getId());
+        log("finished transaction!");
         return id;
     }
+
+
 
     private void validateSamePerson(User sender, User receiver) {
         if(sender.getId().equals(receiver.getId()))
@@ -83,8 +88,16 @@ public class TransactionService implements CreateTransactionUseCase {
             throw new ApplicationException(ErrorEnum.SENDER_TYPE_CANT_PAY);
     }
 
-    private void notifyReceiver(CreateTransactionRequest request) {
-        // TODO call notify service
+    private void notifyUsers(Long... usersId) {
+        Arrays.stream(usersId)
+                        .forEach(id -> {
+                            log("calling notification API for id: " + id);
+                            CompletableFuture
+                                    .runAsync(() -> {
+                                        restClient.notifyUser(id);
+                                    })
+                                    .whenComplete((v,t) -> log("call to notification API finishes. id: " + id.toString()));
+                        });
     }
 
     private UUID doTransaction(User sender, User receiver, Double amount) {
@@ -115,7 +128,6 @@ public class TransactionService implements CreateTransactionUseCase {
         if(user.getBalance() < amount)
             throw new  ApplicationException(ErrorEnum.INSUFFICIENT_FUNDS);
     }
-
 
     private User validateReceiverExistence(CreateTransactionRequest request) {
         Optional<User> user = getUser(
