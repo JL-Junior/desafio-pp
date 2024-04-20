@@ -69,18 +69,18 @@ public class TransactionService implements CreateTransactionUseCase {
 
     private void validateSamePerson(User sender, User receiver) {
         if(sender.getId().equals(receiver.getId()))
-            throw ApplicationException.of(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
+            throw new ApplicationException(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
     }
 
 
     private void validateCanReceive(User user) {
         if(! user.getUserType().getReceive())
-            throw ApplicationException.of(ErrorEnum.RECEIVER_TYPE_CANT_RECEIVE);
+            throw new ApplicationException(ErrorEnum.RECEIVER_TYPE_CANT_RECEIVE);
     }
 
     private void validateCanPay(User user) {
         if(! user.getUserType().getSend())
-            throw ApplicationException.of(ErrorEnum.SENDER_TYPE_CANT_PAY);
+            throw new ApplicationException(ErrorEnum.SENDER_TYPE_CANT_PAY);
     }
 
     private void notifyReceiver(CreateTransactionRequest request) {
@@ -113,7 +113,7 @@ public class TransactionService implements CreateTransactionUseCase {
 
     private void validateBalance(User user, Double amount) {
         if(user.getBalance() < amount)
-            throw ApplicationException.of(ErrorEnum.INSUFFICIENT_FUNDS);
+            throw new  ApplicationException(ErrorEnum.INSUFFICIENT_FUNDS);
     }
 
 
@@ -123,7 +123,7 @@ public class TransactionService implements CreateTransactionUseCase {
                 request.document_receiver(),
                 request.email_receiver());
 
-        return user.orElseThrow(() -> NotFoundApplicationException.of(ErrorEnum.RECEIVER_NOT_FOUND));
+        return user.orElseThrow(() -> new NotFoundApplicationException(ErrorEnum.RECEIVER_NOT_FOUND));
     }
 
     private User validateSenderExistence(CreateTransactionRequest request) {
@@ -132,7 +132,7 @@ public class TransactionService implements CreateTransactionUseCase {
                 request.document_sender(),
                 request.email_sender());
 
-        return user.orElseThrow(() -> NotFoundApplicationException.of(ErrorEnum.SENDER_NOT_FOUND));
+        return user.orElseThrow(() -> new NotFoundApplicationException(ErrorEnum.SENDER_NOT_FOUND));
     }
 
     private Optional<User> getUser(Long id, Long document, String email) {
@@ -174,7 +174,7 @@ public class TransactionService implements CreateTransactionUseCase {
                 continue;
 
             if (receiverData.equals(senderData))
-                throw ApplicationException.of(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
+                throw new  ApplicationException(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
         }
     }
 
@@ -193,7 +193,7 @@ public class TransactionService implements CreateTransactionUseCase {
         log("Validating if has no sender identifier fields...");
 
         if(isAllNull)
-            throw ApplicationException.of(ErrorEnum.NO_SENDER_DATA);
+            throw new  ApplicationException(ErrorEnum.NO_SENDER_DATA);
 
         boolean hasTooMuchData = senderData
                 .stream()
@@ -202,7 +202,7 @@ public class TransactionService implements CreateTransactionUseCase {
 
         log("Validating if has too much sender identifier fields...");
         if(hasTooMuchData)
-            throw ApplicationException.of(ErrorEnum.TOO_MUCH_SENDER_ID_FIELDS);
+            throw new  ApplicationException(ErrorEnum.TOO_MUCH_SENDER_ID_FIELDS);
     }
 
     private void validateReceiverData(CreateTransactionRequest request){
@@ -219,7 +219,7 @@ public class TransactionService implements CreateTransactionUseCase {
         log("Validating if has no receiver identifier fields...");
 
         if(isAllNull)
-            throw ApplicationException.of(ErrorEnum.NO_RECEIVER_DATA);
+            throw new  ApplicationException(ErrorEnum.NO_RECEIVER_DATA);
 
         boolean hasTooMuchData = receiverData
                 .stream()
@@ -228,7 +228,7 @@ public class TransactionService implements CreateTransactionUseCase {
 
         log("Validating if has too much receiver identifier fields...");
         if(hasTooMuchData)
-            throw ApplicationException.of(ErrorEnum.TOO_MUCH_RECEIVER_ID_FIELDS);
+            throw new  ApplicationException(ErrorEnum.TOO_MUCH_RECEIVER_ID_FIELDS);
     }
 
     private static void log(String message) {

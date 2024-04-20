@@ -10,8 +10,4 @@ import org.desafio.domain.enumeration.ErrorEnum;
 public class ApplicationException extends RuntimeException{
 
     final ErrorEnum errorEnum;
-    public static ApplicationException of(ErrorEnum errorEnum) {
-        return new ApplicationException(errorEnum);
-    }
-
 }

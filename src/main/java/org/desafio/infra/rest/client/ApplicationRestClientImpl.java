@@ -3,10 +3,10 @@ package org.desafio.infra.rest.client;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import org.desafio.domain.enumeration.ErrorEnum;
 import org.desafio.domain.exception.ApiCallException;
 import org.desafio.infra.rest.dto.AuthorizationResponse;
-import org.desafio.presentation.context.ApplicationContext;
+import org.desafio.infra.rest.dto.NotifyUserResponse;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.reactive.ClientWebApplicationException;
 
@@ -26,29 +26,24 @@ public class ApplicationRestClientImpl implements ApplicationRestClient {
     }
 
     @Override
-    public void authorizeTransaction(UUID transactionId) throws ApiCallException {
+    public AuthorizationResponse authorizeTransaction(UUID transactionId) throws ApiCallException {
         Log.info("Calling authorization service api...");
 
         try{
-            authClient.authorizeTransaction();
-
+            return authClient.authorizeTransaction().getEntity();
         }catch (ClientWebApplicationException exception){
             Log.error("Error on call authorizations service!", exception);
-
-            final Response response = exception.getResponse();
-
-            throw ApiCallException
-                    .builder()
-                    .payload(response.readEntity(String.class))
-                    .statusCode(response.getStatus())
-                    .endpoint(response.getLocation().getPath())
-                    .build();
+            throw new ApiCallException(ErrorEnum.ERROR_ON_AUTHORIZATION_SERVICE_CALL);
         }
     }
 
     @Override
-    public boolean notifyUser(Long userId) throws ApiCallException {
-        // se falhar, retornar false
-        return true;
+    public NotifyUserResponse notifyUser(Long userId) throws ApiCallException {
+        try{
+            return notificationClient.notifyUser().getEntity();
+        }catch (ClientWebApplicationException exception){
+            Log.error("Error on call notification service!", exception);
+            throw new ApiCallException(ErrorEnum.ERROR_ON_NOTIFICATION_SERVICE_CALL);
+        }
     }
 }

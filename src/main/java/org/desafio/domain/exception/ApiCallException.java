@@ -3,7 +3,11 @@ package org.desafio.domain.exception;
 import jakarta.json.JsonObject;
 import lombok.Builder;
 import lombok.Getter;
+import org.desafio.domain.enumeration.ErrorEnum;
 
-@Builder
 @Getter
-public class ApiCallException extends Exception {}
+public class ApiCallException extends ApplicationException {
+    public ApiCallException(ErrorEnum errorEnum) {
+        super(errorEnum);
+    }
+}
