@@ -1,0 +1,20 @@
+quarkus:
+#  hibernate-orm:
+#    database:
+#      generation:
+#        ~: none
+
+  datasource:
+    db-kind: h2
+    username: sa
+    password:
+    jdbc:
+      url: jdbc:h2:mem:dev
+      max-size: 16
+
+  rest-client:
+    scope: jakarta.inject.Singleton
+    authorization-api:
+      url: 'http://localhost:000'
+    notification-api:
+      url: 'http://localhost:000'

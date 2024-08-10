@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 @ApplicationScoped
@@ -88,14 +89,13 @@ public class TransactionService implements CreateTransactionUseCase {
             throw new ApplicationException(ErrorEnum.SENDER_TYPE_CANT_PAY);
     }
 
-    private void notifyUsers(Long... usersId) {
+    @SneakyThrows
+    private void notifyUsers(Long... usersId){
         Arrays.stream(usersId)
                         .forEach(id -> {
                             log("calling notification API for id: " + id);
                             CompletableFuture
-                                    .runAsync(() -> {
-                                        restClient.notifyUser(id);
-                                    })
+                                    .runAsync(() -> restClient.notifyUser(id))
                                     .whenComplete((v,t) -> log("call to notification API finishes. id: " + id.toString()));
                         });
     }
@@ -174,19 +174,22 @@ public class TransactionService implements CreateTransactionUseCase {
 
     private void validateSameData(CreateTransactionRequest request) {
         log("Validating if has same input...");
-        Object[][] validationData = new Object[][]{
+        Object[][] validationMatrix = new Object[][]{
                 {request.id_receiver(), request.id_sender()},
                 {request.email_receiver(), request.email_sender()},
                 {request.document_receiver(), request.document_sender()}
         };
-        for (Object[] validationDatum : validationData) {
-            Object receiverData = validationDatum[0];
-            Object senderData = validationDatum[1];
-            if (Objects.isNull(receiverData) || Objects.isNull(senderData))
-                continue;
+        for (Object[] validationArray : validationMatrix) {
+            boolean hasNull = Arrays
+                    .stream(validationArray)
+                    .anyMatch(Objects::isNull);
+            if(hasNull) continue;
+
+            Object receiverData = validationArray[0];
+            Object senderData = validationArray[1];
 
             if (receiverData.equals(senderData))
-                throw new  ApplicationException(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
+                throw new ApplicationException(ErrorEnum.SAME_RECEIVER_AND_SENDER_DATA);
         }
     }
 
@@ -240,7 +243,7 @@ public class TransactionService implements CreateTransactionUseCase {
 
         log("Validating if has too much receiver identifier fields...");
         if(hasTooMuchData)
-            throw new  ApplicationException(ErrorEnum.TOO_MUCH_RECEIVER_ID_FIELDS);
+            throw new ApplicationException(ErrorEnum.TOO_MUCH_RECEIVER_ID_FIELDS);
     }
 
     private static void log(String message) {
