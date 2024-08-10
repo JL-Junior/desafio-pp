@@ -1,63 +1,54 @@
-# desafio.pp
+# Projeto Pedagógico de Backend
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Esse projeto é desenvolvido com finalidade pedagógica e de demonstração de proficiência.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+Aqui usaremos um desafio de backend para explorar o framework Quarkus no desenvolvimento de um microsserviço de transações, explorando os conceitos de boas práticas de desenvolvimento de software.
 
-## Running the application in dev mode
+## Setup de Ambiente
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./gradlew quarkusDev
-```
+Podemos observar que há um arquivo na raiz deste projeto chamado "docker-compose.yaml". Neste arquivo são definidos os seguintes serviços de infraestrutura:
+- db (postgres): banco de dados necessário para persistência das informações transacionais e de parâmetros.
+- app: imagem da aplicação para observarmos seu funcionamento em ambiente "produtivo".
+- sonarqube: serviço de análise de cobertura de testes unitários e **code_smells**
+- metabase: serviço de visualização de base de dados que nos permite validar se o funcionamento do serviço é adequado.
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+Para iniciar a aplicação, primeiro devemos preparar sua imagem para rodar em um container Docker. Para isso, utilize os comandos a seguir:
 
-## Packaging and running the application
-
-The application can be packaged using:
+- Preparar o projeto:
 ```shell script
 ./gradlew build
 ```
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
 
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
+- Preparar imagem para rodar em container
 ```shell script
-./gradlew build -Dquarkus.package.type=uber-jar
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus/desafio.pp-jvm
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
+Feito isso, terá a imagem docker da aplicação disponível para iniciar a aplicação.
 
-## Creating a native executable
+Com o comando a seguir, você irá iniciar a aplicação e os serviços de infraestrutura necessários para seu funcionamento.
 
-You can create a native executable using: 
 ```shell script
-./gradlew build -Dquarkus.package.type=native
+docker compose up -d
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
+Então utilizando a seguinte requisição, deve receber uma resposta indicando sucesso na operação:
+
 ```shell script
-./gradlew build -Dquarkus.package.type=native -Dquarkus.native.container-build=true
+curl --location 'http://localhost:8080/transactions' --header 'Content-Type: application/json' --data '{ "amount": 10.00, "document_sender": 100100100,"document_receiver": 200200200}'
 ```
 
-You can then execute your native executable with: `./build/desafio.pp-1.0.0-SNAPSHOT-runner`
+## Conceitos Abordados
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/gradle-tooling.
+### Code First
+Utilizando a biblioteca **quarkus-smallrye-openapi** podemos gerar um arquivo de swagger a partir de nossas classes e entidades desenvolvidas em código Java, como podemos ver nessa [classe](./src/main/java/org/desafio/presentation/api/TransactionAPI.java)
 
-## Related Guides
+### Repository Pattern
+Utilizando a biblioteca **Panache** podemos abstrair as operações nos bancos de dados e manipular a leitura e persistência de dados de maneira fácil e intuitiva.
 
-- REST resources for Hibernate ORM with Panache ([guide](https://quarkus.io/guides/rest-data-panache)): Generate Jakarta REST resources for your Hibernate Panache entities and repositories
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Validate object properties (field, getter) and method parameters for your beans (REST, CDI, Jakarta Persistence)
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
+### Fail Fast
+Utilizando a biblioteca **hibernate-validator** podemos definir regras de validações com anotações simples e eficientes, permitindo-nos validar os campos dos objetos de entrada antes mesmo de iniciarmos as funções de negócio.
 
-## Provided Code
+### Exception Handling
+Neste projeto, podemos observar a centralização de tratamento de erros, atribuindo essa tarefa a classes específicas para essa função, como podemos observar [nessa pasta](src/main/java/org/desafio/presentation/exceptionhandler)
 
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
